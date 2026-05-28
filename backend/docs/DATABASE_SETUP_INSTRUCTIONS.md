@@ -21,7 +21,7 @@ Since the Supabase CLI has network connectivity issues, follow these steps to se
    - Click **"New Query"**
 
 3. **Copy and Paste:**
-   - Open the file: `QUICK_DATABASE_SETUP.sql` (created in project root)
+   - Open the file: `backend/database/QUICK_DATABASE_SETUP.sql`
    - Copy the **ENTIRE content**
    - Paste it into the SQL Editor
 
@@ -42,7 +42,7 @@ Since the Supabase CLI has network connectivity issues, follow these steps to se
 If the CLI connection issues resolve, you can run:
 
 ```bash
-./supabase.exe db push
+./backend/bin/supabase.exe db push
 ```
 
 However, the Dashboard method is more reliable.
@@ -81,7 +81,7 @@ After running the SQL script, verify by checking:
 
 1. **Run the app:**
    ```bash
-   cd Project/Frontend
+   cd frontend
    flutter run
    ```
 

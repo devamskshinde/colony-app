@@ -73,12 +73,12 @@
 
 ### Files in Repository:
 ```
-✅ All Flutter code (lib/)
-✅ Database schema files (Project/supabase/sql/)
-✅ QUICK_DATABASE_SETUP.sql
-✅ DATABASE_SETUP_INSTRUCTIONS.md
+✅ All Flutter code (frontend/lib/)
+✅ Database schema files (backend/supabase/sql/)
+✅ QUICK_DATABASE_SETUP.sql (backend/database/)
+✅ DATABASE_SETUP_INSTRUCTIONS.md (backend/docs/)
 ✅ README.md (comprehensive)
-✅ Helper scripts (push_database.py, push_database_node.js)
+✅ Helper scripts (backend/scripts/push_database.py, backend/scripts/push_database_node.js)
 ✅ Supabase migrations
 ❌ Removed: Project/backend/ (unused)
 ```
@@ -98,7 +98,7 @@ I **could not push the database schema programmatically** because:
 
 ### Step-by-Step (5 minutes):
 
-1. **Open:** `QUICK_DATABASE_SETUP.sql` file
+1. **Open:** `backend/database/QUICK_DATABASE_SETUP.sql` file
 2. **Copy:** All content (Ctrl+A, Ctrl+C)
 3. **Go to:** https://supabase.com/dashboard/project/pfcqskmitzeclipipvak/sql
 4. **Paste:** In SQL Editor
@@ -107,7 +107,7 @@ I **could not push the database schema programmatically** because:
 7. **Reload Schema:**
    - Settings → API → Schema Cache → Reload
 
-**See `DATABASE_SETUP_INSTRUCTIONS.md` for detailed steps!**
+**See `backend/docs/DATABASE_SETUP_INSTRUCTIONS.md` for detailed steps!**
 
 ---
 
@@ -115,7 +115,7 @@ I **could not push the database schema programmatically** because:
 
 ```bash
 # Navigate to project
-cd Project/Frontend
+cd frontend
 
 # Run the app
 flutter run

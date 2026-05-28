@@ -11,8 +11,12 @@ import time
 SUPABASE_URL = "https://pfcqskmitzeclipipvak.supabase.co"
 SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmY3Fza21pdHplY2xpcGlwdmFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyMTI3NjQsImV4cCI6MjA5MDc4ODc2NH0.YY3yWVWAiTadyxiJLrZiO_99ccfmF_Ld-JA2aFXAVGM"
 
+import os
+
 # Read the SQL file
-with open('QUICK_DATABASE_SETUP.sql', 'r', encoding='utf-8') as f:
+script_dir = os.path.dirname(os.path.abspath(__file__))
+sql_path = os.path.join(script_dir, "..", "database", "QUICK_DATABASE_SETUP.sql")
+with open(sql_path, 'r', encoding='utf-8') as f:
     sql_content = f.read()
 
 print("=" * 60)

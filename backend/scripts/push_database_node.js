@@ -28,8 +28,11 @@ async function executeSQL(sql) {
   }
 }
 
+const path = require('path');
+
 async function createTableViaAPI() {
-  const sqlContent = fs.readFileSync('QUICK_DATABASE_SETUP.sql', 'utf8');
+  const sqlPath = path.join(__dirname, '..', 'database', 'QUICK_DATABASE_SETUP.sql');
+  const sqlContent = fs.readFileSync(sqlPath, 'utf8');
 
   console.log('='.repeat(60));
   console.log('🚀 Pushing database schema to Supabase...');
