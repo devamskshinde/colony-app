@@ -50,7 +50,10 @@ fi
 # ── PostgreSQL executor ───────────────────────────────────────────────────────
 MODE="${1:-}"
 
-if [[ "$MODE" == "--host" ]]; then
+if [[ -n "${DATABASE_URL:-}" ]]; then
+    sql() { psql "$DATABASE_URL" -tAc "$1" 2>/dev/null || echo "ERROR"; }
+    sql_noout() { psql "$DATABASE_URL" -c "$1" &>/dev/null 2>&1; }
+elif [[ "$MODE" == "--host" || -n "${PGHOST:-}" ]]; then
     PGUSER="${PGUSER:-postgres}"
     PGPASSWORD="${PGPASSWORD:-postgres}"
     PGHOST="${PGHOST:-localhost}"
@@ -59,14 +62,21 @@ if [[ "$MODE" == "--host" ]]; then
     sql() { PGPASSWORD="$PGPASSWORD" psql -h "$PGHOST" -p "$PGPORT" -U "$PGUSER" -d "$PGDB" -tAc "$1" 2>/dev/null || echo "ERROR"; }
     sql_noout() { PGPASSWORD="$PGPASSWORD" psql -h "$PGHOST" -p "$PGPORT" -U "$PGUSER" -d "$PGDB" -c "$1" &>/dev/null 2>&1; }
 else
-    # Default: Docker container
-    if ! docker ps --format '{{.Names}}' 2>/dev/null | grep -q "^colony-db$"; then
-        echo -e "${RED}ERROR: colony-db container is not running.${RESET}"
-        echo "Start it: bash scripts/colony.sh start"
-        exit 1
+    # Default: Try Docker container first, fallback to host if docker isn't running but psql is configured
+    if docker ps --format '{{.Names}}' 2>/dev/null | grep -q "^colony-db$"; then
+        sql()      { docker exec colony-db psql -U postgres -tAc "$1" 2>/dev/null || echo "ERROR"; }
+        sql_noout() { docker exec colony-db psql -U postgres -c "$1" &>/dev/null 2>&1; }
+    else
+        # If no docker container and no DATABASE_URL set, try local default host
+        warn "colony-db container not running. Trying local host fallback (localhost:5432)..."
+        PGUSER="${PGUSER:-postgres}"
+        PGPASSWORD="${PGPASSWORD:-postgres}"
+        PGHOST="${PGHOST:-localhost}"
+        PGPORT="${PGPORT:-5432}"
+        PGDB="${PGDATABASE:-postgres}"
+        sql() { PGPASSWORD="$PGPASSWORD" psql -h "$PGHOST" -p "$PGPORT" -U "$PGUSER" -d "$PGDB" -tAc "$1" 2>/dev/null || echo "ERROR"; }
+        sql_noout() { PGPASSWORD="$PGPASSWORD" psql -h "$PGHOST" -p "$PGPORT" -U "$PGUSER" -d "$PGDB" -c "$1" &>/dev/null 2>&1; }
     fi
-    sql()      { docker exec colony-db psql -U postgres -tAc "$1" 2>/dev/null || echo "ERROR"; }
-    sql_noout() { docker exec colony-db psql -U postgres -c "$1" &>/dev/null 2>&1; }
 fi
 
 # ── Table existence check ─────────────────────────────────────────────────────

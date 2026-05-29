@@ -54,7 +54,12 @@ VERIFY=false
 [[ "$MODE" == "--verify" ]] && { VERIFY=true; MODE=""; }
 
 # ── SQL executor ──────────────────────────────────────────────────────────────
-if [[ "$MODE" == "--host" ]]; then
+if [[ -n "${DATABASE_URL:-}" ]]; then
+    run_sql() {
+        local FILE="$1"
+        psql "$DATABASE_URL" -f "$FILE"
+    }
+elif [[ "$MODE" == "--host" || -n "${PGHOST:-}" ]]; then
     PGUSER="${PGUSER:-postgres}"
     PGPASSWORD="${PGPASSWORD:-postgres}"
     PGHOST="${PGHOST:-localhost}"
@@ -65,13 +70,24 @@ if [[ "$MODE" == "--host" ]]; then
         PGPASSWORD="$PGPASSWORD" psql -h "$PGHOST" -p "$PGPORT" -U "$PGUSER" -d "$PGDB" -f "$FILE"
     }
 else
-    if ! docker ps --format '{{.Names}}' 2>/dev/null | grep -q "^colony-db$"; then
-        fatal "colony-db container not running. Start it: bash scripts/colony.sh start"
+    if docker ps --format '{{.Names}}' 2>/dev/null | grep -q "^colony-db$"; then
+        run_sql() {
+            local FILE="$1"
+            docker exec -i colony-db psql -U postgres < "$FILE"
+        }
+    else
+        # Fallback to local default host if docker isn't running
+        warn "colony-db container not running. Trying local host fallback (localhost:5432)..."
+        PGUSER="${PGUSER:-postgres}"
+        PGPASSWORD="${PGPASSWORD:-postgres}"
+        PGHOST="${PGHOST:-localhost}"
+        PGPORT="${PGPORT:-5432}"
+        PGDB="${PGDATABASE:-postgres}"
+        run_sql() {
+            local FILE="$1"
+            PGPASSWORD="$PGPASSWORD" psql -h "$PGHOST" -p "$PGPORT" -U "$PGUSER" -d "$PGDB" -f "$FILE"
+        }
     fi
-    run_sql() {
-        local FILE="$1"
-        docker exec -i colony-db psql -U postgres < "$FILE"
-    }
 fi
 
 # ── Apply a SQL file ──────────────────────────────────────────────────────────
